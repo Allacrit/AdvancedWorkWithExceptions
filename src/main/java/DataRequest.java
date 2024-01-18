@@ -1,4 +1,7 @@
 import java.io.FileWriter;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.Scanner;
 
 public class DataRequest {
@@ -11,45 +14,79 @@ public class DataRequest {
     private char gender;
     private final Scanner scan = new Scanner(System.in);
 
-    private void EnterFirstName() {
+    private void enterFirstLastMiddleName() {
+        String inputData;
         do {
-            System.out.print("Введите имя: ");
-            firstName = scan.nextLine();
-        } while (correctInput(firstName));
+            do {
+                System.out.print("""
+                        Введите Ф.И.О. через пробел. Пример:\s
+                        Иванов Иван Иванович
+                        """);
+
+                inputData = scan.nextLine().trim();
+            } while (correctInput(inputData));
+        } while (dataTransferFIO(inputData));
     }
 
-    private void EnterLastName() {
+    private void enterYearOfBirth() {
+        String tempData;
         do {
-            System.out.print("Введите фамилию: ");
-            lastName = scan.nextLine();
-        } while (correctInput(lastName));
+            do {
+                System.out.print("Введите дату рождения формата dd.mm.yyyy: ");
+                tempData = scan.nextLine().trim();
+            } while (correctInput(tempData));
+        } while (correctDataBirth(tempData));
     }
 
-    private void EnterMiddleName() {
-        do {
-            System.out.print("Введите отчество: ");
-            middleName = scan.nextLine();
-        } while (correctInput(middleName));
+    private boolean correctDataBirth(String tempData) {
+        if (tempData.contains(".")) {
+            return creatingAndVerifyDate(creatingBasedOnDelimiters(tempData, "."));
+        } else if (tempData.contains(",")) {
+            return creatingAndVerifyDate(creatingBasedOnDelimiters(tempData, ","));
+        } else if (tempData.contains("/")) {
+            return creatingAndVerifyDate(creatingBasedOnDelimiters(tempData, "/"));
+        } else if (tempData.contains(" ")) {
+            return creatingAndVerifyDate(creatingBasedOnDelimiters(tempData, " "));
+        } else {
+            System.out.println("Не корректные данные отсутствуют разрешённые разделители . , / 'Пробел'");
+            return true;
+        }
     }
 
-    private void EnterYearOfBirth() {
-        do {
-            System.out.print("Введите год рождения: ");
-            yearOfBirth = scan.nextLine();
-        } while (correctInput(yearOfBirth));
+    private String[] creatingBasedOnDelimiters(String tempData, String s) {
+
+        return tempData.split(s);
     }
 
-    private void EnterNumberPhone() {
+    private boolean creatingAndVerifyDate(String[] date) {
+        if (date.length == 3) {
+            if (date[0].length() <= 2 && date[1].length() <= 2 && date[2].length() <= 4) {
+                SimpleDateFormat dateFormat = new SimpleDateFormat("d.MM.yyyy");
+                Calendar calendar = new GregorianCalendar();
+                calendar.set(Integer.parseInt(date[2]), Integer.parseInt(date[1]) - 1, Integer.parseInt(date[0]));
+                yearOfBirth = dateFormat.format(calendar.getTime());
+                return false;
+            } else {
+                System.out.println("Не корректное количество символов в поле. Проверьте правильность ввода");
+                return true;
+            }
+        } else {
+            System.out.println("Не корректные данные. Проверьте правильность ввода");
+            return true;
+        }
+    }
+
+    private void enterNumberPhone() {
         String number;
         do {
             do {
                 System.out.print("Введите номер телефона: ");
                 number = scan.nextLine();
             } while (correctInput(number));
-        } while (correctNumbericData(number));
+        } while (correctNumberData(number));
     }
 
-    private void EnterGender() {
+    private void enterGender() {
         String tempGen;
         do {
             System.out.print("Введите пол (М или Ж):");
@@ -63,8 +100,7 @@ public class DataRequest {
         if (correctInput(genderData)) {
             return true;
         } else if (genderData.length() > 1) {
-            System.out.println("Вы ввели слишком много символов \n" +
-                    "попробуйте снова!");
+            System.out.println("Вы ввели слишком много символов \n" + "попробуйте снова!");
             return true;
         } else if (genderData.toLowerCase().equals(female) || genderData.toLowerCase().equals(male)) {
             gender = genderData.charAt(0);
@@ -77,15 +113,30 @@ public class DataRequest {
 
     private boolean correctInput(String inputData) {
         if (inputData.equals("")) {
-            System.out.println("Вводимое значение не может быть пустым,\n" +
-                    "Попробуйте снова!");
+            System.out.println("Вводимое значение не может быть пустым,\n" + "Попробуйте снова!");
             return true;
         } else {
             return false;
         }
     }
 
-    private boolean correctNumbericData(String inputData) {
+    private boolean dataTransferFIO(String inputData) {
+        String[] dataFIO = inputData.split(" ");
+        if (dataFIO.length == 3) {
+            firstName = dataFIO[1];
+            lastName = dataFIO[0];
+            middleName = dataFIO[2];
+            return false;
+        } else if (dataFIO.length < 3) {
+            System.out.println("Не правильный ввод.Не хватает полей.");
+            return true;
+        } else {
+            System.out.println("Не правильный ввод. Полей более чем 3.");
+            return true;
+        }
+    }
+
+    private boolean correctNumberData(String inputData) {
         try {
             numberPhone = Long.parseLong(inputData);
         } catch (NumberFormatException e) {
@@ -95,29 +146,31 @@ public class DataRequest {
         return false;
     }
 
-    private void OutPutData() {
-        System.out.println("\nИмя:  \t- \t" + firstName + "\n" + "Фамилия:  \t- \t" + lastName + "\n" +
-                "Отчество:  \t- \t" + middleName + "\n" + "Год рождения:  \t- \t" + yearOfBirth + "\n" +
-                "Номер телефона:  \t- \t" + numberPhone + "\n" + "Пол:    \t- \t" + gender);
+    private void outPutData() {
+        System.out.printf("""
+                Имя:             %s
+                Фамилия:         %s
+                Отчество:        %s
+                Дата рождения:   %s
+                Номер телефона:  %d
+                Пол:             %s
+                """, firstName, lastName, middleName, yearOfBirth, numberPhone, gender);
     }
 
-    private void DataEnter() {
-        EnterFirstName();
-        EnterLastName();
-        EnterMiddleName();
-        EnterYearOfBirth();
-        EnterNumberPhone();
-        EnterGender();
-        OutPutData();
+    private void dataEnter() {
+        enterFirstLastMiddleName();
+        enterYearOfBirth();
+        enterNumberPhone();
+        enterGender();
+        outPutData();
     }
 
-    public void SaveDataEnter() {
+    public void saveDataEnter() {
 
-        DataEnter();
+        dataEnter();
         String file = "src/main/java/Data/" + lastName + ".txt";
         try (FileWriter fw = new FileWriter(file, true)) {
-            fw.write("<" + firstName + "> " + "<" + lastName + "> " + "<" + middleName + "> " + "<" +
-                    yearOfBirth + "> " + "<" + numberPhone + "> " + "<" + gender + ">\n");
+            fw.write("<" + firstName + "> " + "<" + lastName + "> " + "<" + middleName + "> " + "<" + yearOfBirth + "> " + "<" + numberPhone + "> " + "<" + gender + ">\n");
         } catch (Exception e) {
             e.printStackTrace();
         }
