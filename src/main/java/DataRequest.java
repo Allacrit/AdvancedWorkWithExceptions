@@ -54,7 +54,6 @@ public class DataRequest {
     }
 
     private String[] creatingBasedOnDelimiters(String tempData, String s) {
-
         return tempData.split(s);
     }
 
