@@ -169,7 +169,8 @@ public class DataRequest {
         dataEnter();
         String file = "src/main/java/Data/" + lastName + ".txt";
         try (FileWriter fw = new FileWriter(file, true)) {
-            fw.write("<" + firstName + "> " + "<" + lastName + "> " + "<" + middleName + "> " + "<" + yearOfBirth + "> " + "<" + numberPhone + "> " + "<" + gender + ">\n");
+            fw.write("<" + firstName + "> " + "<" + lastName + "> " + "<" + middleName + "> "
+                    + "<" + yearOfBirth + "> " + "<" + numberPhone + "> " + "<" + gender + ">\n");
         } catch (Exception e) {
             e.printStackTrace();
         }
